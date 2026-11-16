@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#312e81" />
+  <meta name="description" content="Official University & College Previous Year Question Papers Portal for Students" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>UniPaper Hub — Official University & College PYQ Portal</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printablePaperArea, #printablePaperArea * {
+        visibility: visible;
+      }
+      #printablePaperArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-800">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Top Navbar -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="resetAllFilters()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">UniPaper<span class="text-indigo-600">Hub</span></span>
+          <p class="text-[11px] text-slate-500 font-medium hidden sm:block -mt-1">Open PYQ Repository for Students</p>
+        </div>
+      </div>
+
+      <!-- Right Navigation Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Owner / Official Badge -->
+        <span class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-600"></i>
+          <span>Official Curated Portal</span>
+        </span>
+
+        <button
+          id="bookmarkToggleBtn"
+          onclick="toggleBookmarksFilter()"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+          title="View Saved Papers"
+        >
+          <i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i>
+          <span class="hidden sm:inline">Saved</span>
+          <span id="savedCountBadge" class="px-1.5 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700">0</span>
+        </button>
+
+        <!-- Admin Login Button (Shown when logged out) -->
+        <button
+          id="headerAdminLoginBtn"
+          onclick="openAdminLoginModal()"
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold border border-slate-200 bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-[0.98]"
+        >
+          <i data-lucide="lock" class="w-4 h-4 text-indigo-300"></i>
+          <span>Admin Login</span>
+        </button>
+
+        <!-- Quick Upload Button (Shown ONLY when logged in as Admin) -->
+        <button
+          id="headerAdminUploadBtn"
+          onclick="openUploadModal()"
+          class="hidden items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-sm shadow-indigo-200 transition-all active:scale-[0.98]"
+        >
+          <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+          <span>Upload Paper</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Admin Control Bar (Visible ONLY after Admin Login) -->
+  <div id="adminControlBar" class="hidden bg-slate-900 text-white border-b border-slate-800 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          OWNER / ADMIN MODE ACTIVE
+        </span>
+        <span class="text-xs text-slate-300 hidden md:inline">Only you can publish, edit, or delete question papers.</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <button
+          onclick="openUploadModal()"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all"
+        >
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Upload New Paper</span>
+        </button>
+        <button
+          onclick="openChangePinModal()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-all"
+        >
+          <i data-lucide="key-round" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Change Admin PIN</span>
+        </button>
+        <button
+          onclick="logoutAdmin()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-200 text-xs font-semibold transition-all"
+        >
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero & Live Stats Section -->
+  <section class="relative overflow-hidden bg-gradient-to-b from-indigo-950 via-indigo-900 to-slate-900 text-white py-10 sm:py-14">
+    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#818cf8 1px, transparent 1px); background-size: 24px 24px;"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-medium mb-4">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>100% Free & Verified PYQ Archive for College & University Students</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+          Previous Year Question Papers, <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-indigo-300">All in One Place.</span>
+        </h1>
+        <p class="mt-3 text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed">
+          Access verified previous year question papers across top universities and colleges. Search by subject, course, or semester and download instantly for exam preparation.
+        </p>
+      </div>
+
+      <!-- Search Bar inside Hero -->
+      <div class="mt-7 max-w-3xl">
+        <div class="relative flex items-center bg-white rounded-2xl shadow-xl shadow-indigo-950/40 p-1.5 border border-white/20">
+          <div class="pl-3.5 pr-2 text-slate-400">
+            <i data-lucide="search" class="w-5 h-5"></i>
+          </div>
+          <input
+            id="searchInput"
+            type="text"
+            oninput="applyFilters()"
+            placeholder="Search by subject name, code (e.g. BCS101), university, or course..."
+            class="w-full py-2.5 px-2 text-sm sm:text-base text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none"
+          />
+          <button
+            id="clearSearchBtn"
+            onclick="clearSearch()"
+            class="hidden px-2.5 py-1.5 text-slate-400 hover:text-slate-600"
+            title="Clear Search"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+          <button
+            onclick="applyFilters()"
+            class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shrink-0"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Stats Cards -->
+      <div class="mt-8 grid grid-cols-3 gap-3 sm:gap-5 max-w-3xl">
+        <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-3.5 sm:p-4">
+          <div class="flex items-center gap-2 text-indigo-300 text-xs font-medium">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>Total Papers</span>
+          </div>
+          <p id="statTotalPapers" class="mt-1 text-xl sm:text-2xl font-extrabold text-white">0</p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-3.5 sm:p-4">
+          <div class="flex items-center gap-2 text-sky-300 text-xs font-medium">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+            <span>Universities</span>
+          </div>
+          <p id="statTotalUniversities" class="mt-1 text-xl sm:text-2xl font-extrabold text-white">0</p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-3.5 sm:p-4">
+          <div class="flex items-center gap-2 text-emerald-300 text-xs font-medium">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Total Downloads</span>
+          </div>
+          <p id="statTotalDownloads" class="mt-1 text-xl sm:text-2xl font-extrabold text-white">0</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area: Filters + Paper Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Multi-level Filter Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 sm:p-5 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2 text-sm font-semibold text-slate-800">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-indigo-600"></i>
+          <span>Filter Question Papers</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="resultsCounter" class="text-xs font-medium text-slate-500">Showing all papers</span>
+          <button
+            onclick="resetAllFilters()"
+            class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <!-- University Filter -->
+        <div>
+          <label for="filterUniversity" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">University / College</label>
+          <select
+            id="filterUniversity"
+            onchange="applyFilters()"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+          >
+            <option value="ALL">All Universities</option>
+          </select>
+        </div>
+
+        <!-- Course Filter -->
+        <div>
+          <label for="filterCourse" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Course / Program</label>
+          <select
+            id="filterCourse"
+            onchange="applyFilters()"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+          >
+            <option value="ALL">All Courses</option>
+          </select>
+        </div>
+
+        <!-- Semester Filter -->
+        <div>
+          <label for="filterSemester" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Semester</label>
+          <select
+            id="filterSemester"
+            onchange="applyFilters()"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+          >
+            <option value="ALL">All Semesters</option>
+            <option value="Sem 1">Semester 1</option>
+            <option value="Sem 2">Semester 2</option>
+            <option value="Sem 3">Semester 3</option>
+            <option value="Sem 4">Semester 4</option>
+            <option value="Sem 5">Semester 5</option>
+            <option value="Sem 6">Semester 6</option>
+            <option value="Sem 7">Semester 7</option>
+            <option value="Sem 8">Semester 8</option>
+          </select>
+        </div>
+
+        <!-- Year Filter -->
+        <div>
+          <label for="filterYear" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Exam Year</label>
+          <select
+            id="filterYear"
+            onchange="applyFilters()"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-700 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+          >
+            <option value="ALL">All Years</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Filter Pill Banner (When Saved Papers filter is active) -->
+    <div id="savedFilterBanner" class="hidden mb-5 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2 text-sm text-amber-800 font-medium">
+        <i data-lucide="bookmark-check" class="w-4 h-4 text-amber-600"></i>
+        <span>Showing your bookmarked / saved question papers only.</span>
+      </div>
+      <button onclick="toggleBookmarksFilter()" class="text-xs font-semibold text-amber-900 hover:underline">
+        Show All Papers
+      </button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingState" class="hidden py-16 text-center">
+      <div class="inline-block w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p class="mt-3 text-sm font-medium text-slate-500">Syncing university question papers...</p>
+    </div>
+
+    <!-- Papers Grid -->
+    <div id="papersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Cards injected dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center my-4">
+      <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="file-search" class="w-7 h-7"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900">No question papers found</h3>
+      <p class="mt-1 text-sm text-slate-500 max-w-md mx-auto">
+        We couldn't find any papers matching your current search or filters. Try clearing your filters to explore all available question papers.
+      </p>
+      <div class="mt-5 flex flex-wrap justify-center gap-3">
+        <button onclick="resetAllFilters()" class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+          Clear Filters
+        </button>
+        <button id="emptyStateUploadBtn" onclick="openUploadModal()" class="hidden px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">
+          + Upload Paper (Admin)
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+      <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+        <span class="font-bold text-slate-800">UniPaper Hub</span>
+        <span>•</span>
+        <span>Curated & Managed by Portal Owner for Students</span>
+      </div>
+      <div class="flex items-center gap-4 text-xs">
+        <span class="text-slate-400">Student Read-Only Access • Instant Preview & Download</span>
+        <button onclick="openAdminLoginModal()" class="font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
+          Admin Access
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== ADMIN LOGIN MODAL ==================== -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 flex items-center justify-center">
+            <i data-lucide="shield" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold">Owner / Admin Login</h2>
+            <p class="text-xs text-slate-400">Authenticate to upload or manage papers</p>
+          </div>
+        </div>
+        <button onclick="closeAdminLoginModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+        <div>
+          <label for="adminPinInput" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Enter Admin PIN / Password
+          </label>
+          <input
+            type="password"
+            id="adminPinInput"
+            required
+            placeholder="Enter secret Admin PIN..."
+            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+          />
+          <p id="adminLoginError" class="hidden mt-1.5 text-xs font-semibold text-rose-600">
+            Incorrect Admin PIN. Please try again.
+          </p>
+        </div>
+
+        <!-- Demo Hint Box -->
+        <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-xs text-indigo-900 flex items-start gap-2.5">
+          <i data-lucide="info" class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold">Default Owner PIN:</span> <code class="px-1.5 py-0.5 rounded bg-white border border-indigo-200 font-mono font-bold text-indigo-700">admin123</code>
+            <p class="text-indigo-700/80 mt-0.5">You can change this PIN anytime inside the Admin Control Bar after logging in.</p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onclick="closeAdminLoginModal()"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold shadow-sm transition-all"
+          >
+            <i data-lucide="unlock" class="w-4 h-4"></i>
+            <span>Unlock Admin Panel</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== CHANGE ADMIN PIN MODAL ==================== -->
+  <div id="changePinModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fade-in">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+            <i data-lucide="key-round" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Change Owner Admin PIN</h2>
+            <p class="text-xs text-slate-500">Set a new private PIN for uploading papers</p>
+          </div>
+        </div>
+        <button onclick="closeChangePinModal()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleChangePin(event)" class="p-6 space-y-4">
+        <div>
+          <label for="newAdminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">New Admin PIN / Password <span class="text-rose-500">*</span></label>
+          <input
+            type="text"
+            id="newAdminPinInput"
+            required
+            minlength="4"
+            placeholder="Minimum 4 characters (e.g. mysecret99)"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+          />
+        </div>
+        <div>
+          <label for="confirmAdminPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Confirm New PIN <span class="text-rose-500">*</span></label>
+          <input
+            type="text"
+            id="confirmAdminPinInput"
+            required
+            minlength="4"
+            placeholder="Re-enter your new PIN"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+          />
+          <p id="changePinError" class="hidden mt-1.5 text-xs font-semibold text-rose-600">PINs do not match.</p>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeChangePinModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm">
+            Save New PIN
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== UPLOAD / EDIT PAPER MODAL (ADMIN ONLY) ==================== -->
+  <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl my-auto overflow-hidden animate-fade-in">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 id="uploadModalTitle" class="text-lg font-bold text-slate-900">Upload Question Paper</h2>
+            <p class="text-xs text-slate-500">Admin Portal • Publish verified PYQ for students</p>
+          </div>
+        </div>
+        <button onclick="closeUploadModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Upload / Edit Form -->
+      <form id="uploadForm" onsubmit="handlePaperUpload(event)" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="editingPaperId" value="" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Subject Name -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject / Paper Title <span class="text-rose-500">*</span></label>
+            <input
+              type="text"
+              id="upSubject"
+              required
+              placeholder="e.g., Data Structures & Algorithms"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            />
+          </div>
+
+          <!-- Subject Code -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject Code <span class="text-rose-500">*</span></label>
+            <input
+              type="text"
+              id="upCode"
+              required
+              placeholder="e.g., BCS-301"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm uppercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            />
+          </div>
+
+          <!-- University / College -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">University / College <span class="text-rose-500">*</span></label>
+            <input
+              type="text"
+              id="upUniversity"
+              list="universitySuggestions"
+              required
+              placeholder="e.g., BBDU Lucknow or AKTU"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            />
+            <datalist id="universitySuggestions">
+              <option value="BBDU Lucknow"></option>
+              <option value="AKTU Lucknow"></option>
+              <option value="Lucknow University"></option>
+              <option value="Delhi University"></option>
+              <option value="Mumbai University"></option>
+              <option value="BHU Varanasi"></option>
+              <option value="Integral University"></option>
+            </datalist>
+          </div>
+
+          <!-- Course -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Course / Degree <span class="text-rose-500">*</span></label>
+            <input
+              type="text"
+              id="upCourse"
+              list="courseSuggestions"
+              required
+              placeholder="e.g., B.Tech CSE"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            />
+            <datalist id="courseSuggestions">
+              <option value="B.Tech CSE"></option>
+              <option value="B.Tech ECE"></option>
+              <option value="BCA"></option>
+              <option value="B.Sc"></option>
+              <option value="MBA"></option>
+              <option value="B.Com"></option>
+              <option value="MCA"></option>
+            </datalist>
+          </div>
+
+          <!-- Semester -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Semester <span class="text-rose-500">*</span></label>
+            <select
+              id="upSemester"
+              required
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            >
+              <option value="Sem 1">Sem 1</option>
+              <option value="Sem 2">Sem 2</option>
+              <option value="Sem 3">Sem 3</option>
+              <option value="Sem 4">Sem 4</option>
+              <option value="Sem 5">Sem 5</option>
+              <option value="Sem 6">Sem 6</option>
+              <option value="Sem 7">Sem 7</option>
+              <option value="Sem 8">Sem 8</option>
+            </select>
+          </div>
+
+          <!-- Exam Year -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Year <span class="text-rose-500">*</span></label>
+            <select
+              id="upYear"
+              required
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            >
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+            </select>
+          </div>
+
+          <!-- Exam Type -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Type <span class="text-rose-500">*</span></label>
+            <select
+              id="upExamType"
+              required
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+            >
+              <option value="End Semester">End Semester</option>
+              <option value="Mid Semester / Sessional">Mid Semester / Sessional</option>
+              <option value="Back Paper / Carry Over">Back Paper / Carry Over</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Optional Sample Questions / Notes if no file attached -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Key Questions / Notes (Optional)</label>
+          <textarea
+            id="upNotes"
+            rows="2"
+            placeholder="Paste important questions or exam instructions (helpful if uploading without a PDF)..."
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+          ></textarea>
+        </div>
+
+        <!-- File Dropzone -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Attach Question Paper (PDF, JPG, PNG)</label>
+          <label
+            for="upFile"
+            class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-400 transition-all px-4 text-center"
+          >
+            <i data-lucide="file-up" class="w-6 h-6 text-indigo-600 mb-1.5"></i>
+            <span id="fileNameDisplay" class="text-xs sm:text-sm font-medium text-slate-700">Click to select PDF or scanned image</span>
+            <span class="text-[11px] text-slate-400 mt-0.5">Supports PDF, PNG, JPG (Instant preview & download)</span>
+            <input id="upFile" type="file" accept=".pdf,image/*" class="hidden" onchange="handleFileSelect(event)" />
+          </label>
+        </div>
+
+        <!-- Submit Footer -->
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onclick="closeUploadModal()"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="submitUploadBtn"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition-all"
+          >
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>Publish Paper</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== PAPER PREVIEW MODAL ==================== -->
+  <div id="previewModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-3 sm:p-5">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden animate-fade-in">
+      <!-- Preview Header -->
+      <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3 shrink-0">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span id="prevCodeBadge" class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold">CODE</span>
+            <span id="prevUniBadge" class="text-xs font-semibold text-slate-500 truncate">University</span>
+          </div>
+          <h3 id="prevTitle" class="text-base sm:text-lg font-bold text-slate-900 truncate mt-0.5">Subject Title</h3>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            id="prevDownloadBtn"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Download</span>
+          </button>
+          <button
+            onclick="window.print()"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium"
+            title="Print Paper"
+          >
+            <i data-lucide="printer" class="w-4 h-4"></i>
+          </button>
+          <button
+            onclick="closePreviewModal()"
+            class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition-colors"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Body (Dynamic: Real PDF/Image OR Realistic Formatted Exam Paper) -->
+      <div id="previewBody" class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase + App Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, setDoc, getDoc, doc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- 0. PWA MANIFEST INJECTION (Installable Web App) ---
+    (function setupPWAManifest() {
+      const manifest = {
+        name: "UniPaper Hub — University PYQ Portal",
+        short_name: "UniPaper Hub",
+        description: "Verified University & College Previous Year Question Papers Portal",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#f8fafc",
+        theme_color: "#312e81",
+        icons: [
+          {
+            src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Ctext x='50' y='66' font-size='52' text-anchor='middle' fill='white'%3E🎓%3C/text%3E%3C/svg%3E",
+            sizes: "192x192",
+            type: "image/svg+xml"
+          }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      const manifestURL = URL.createObjectURL(blob);
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = manifestURL;
+      document.head.appendChild(link);
+    })();
+
+    // --- 1. PRE-LOADED REALISTIC SAMPLE DATA ---
+    let samplePapers = [
+      {
+        id: "sample-1",
+        subject: "Computer Concepts & Programming in C",
+        code: "BCS-101",
+        university: "BBDU Lucknow",
+        course: "B.Tech CSE",
+        semester: "Sem 1",
+        year: "2025",
+        examType: "End Semester",
+        fileSize: "1.4 MB",
+        downloads: 428,
+        isSample: true,
+        maxMarks: 100,
+        duration: "3 Hours",
+        questions: [
+          "Q1 (a) Explain the block diagram of a digital computer with neat labels and describe ALU and Control Unit. [10 Marks]",
+          "Q1 (b) Differentiate between Compiler, Interpreter, and Assembler with suitable examples. [10 Marks]",
+          "Q2 (a) Write a C program to check whether a given matrix is symmetric or not using 2D arrays. [10 Marks]",
+          "Q2 (b) Explain call by value and call by reference in C with a swapping program using pointers. [10 Marks]",
+          "Q3 (a) What is recursion? Write a recursive function in C to generate the Fibonacci series up to N terms. [10 Marks]",
+          "Q4 (a) Define Structure and Union in C. Write a program to store and display records of 50 students. [10 Marks]",
+          "Q5 (a) Explain dynamic memory allocation functions: malloc(), calloc(), realloc(), and free(). [10 Marks]"
+        ]
+      },
+      {
+        id: "sample-2",
+        subject: "Engineering Calculus & Linear Algebra",
+        code: "BAS-103",
+        university: "AKTU Lucknow",
+        course: "B.Tech CSE",
+        semester: "Sem 1",
+        year: "2025",
+        examType: "End Semester",
+        fileSize: "1.8 MB",
+        downloads: 512,
+        isSample: true,
+        maxMarks: 70,
+        duration: "3 Hours",
+        questions: [
+          "Q1 (a) Find the rank of the matrix A by reducing it to normal (canonical) form. [7 Marks]",
+          "Q1 (b) State and verify Cayley-Hamilton theorem for a 3x3 non-singular matrix and find its inverse. [7 Marks]",
+          "Q2 (a) State Euler's theorem on homogeneous functions. If u = sin⁻¹((x+y)/(√x+√y)), prove x(∂u/∂x) + y(∂u/∂y) = (1/2)tan u. [7 Marks]",
+          "Q3 (a) Expand e^x log(1+y) in powers of x and y up to terms of third degree using Taylor's theorem. [7 Marks]",
+          "Q4 (a) Evaluate the double integral ∬ xy(x+y) dx dy over the area between y = x² and y = x. [7 Marks]",
+          "Q5 (a) Verify Gauss Divergence Theorem for F = (x² - yz)i + (y² - zx)j + (z² - xy)k over the rectangular parallelepiped. [7 Marks]"
+        ]
+      },
+      {
+        id: "sample-3",
+        subject: "Quantum Physics & Optoelectronics",
+        code: "BAS-101",
+        university: "BBDU Lucknow",
+        course: "B.Tech CSE",
+        semester: "Sem 1",
+        year: "2026",
+        examType: "End Semester",
+        fileSize: "1.2 MB",
+        downloads: 319,
+        isSample: true,
+        maxMarks: 100,
+        duration: "3 Hours",
+        questions: [
+          "Q1 (a) Derive time-independent Schrödinger wave equation for a free particle moving in one dimension. [10 Marks]",
+          "Q1 (b) What is Compton Effect? Derive an expression for Compton shift Δλ = (h/m₀c)(1 - cosθ). [10 Marks]",
+          "Q2 (a) Explain the construction and working of a He-Ne Laser with a neat energy level diagram. [10 Marks]",
+          "Q3 (a) Define Numerical Aperture and Acceptance Angle of an optical fiber. Derive expressions for both. [10 Marks]",
+          "Q4 (a) Explain Meissner effect and distinguish between Type-I and Type-II superconductors. [10 Marks]"
+        ]
+      },
+      {
+        id: "sample-4",
+        subject: "Basic Electronics Engineering",
+        code: "BEC-101",
+        university: "AKTU Lucknow",
+        course: "B.Tech ECE",
+        semester: "Sem 1",
+        year: "2024",
+        examType: "End Semester",
+        fileSize: "2.1 MB",
+        downloads: 645,
+        isSample: true,
+        maxMarks: 70,
+        duration: "3 Hours",
+        questions: [
+          "Q1 (a) Draw and explain the V-I characteristics of a PN junction diode under forward and reverse bias. [7 Marks]",
+          "Q1 (b) Explain the working of a Bridge Rectifier with capacitor filter and derive its ripple factor. [7 Marks]",
+          "Q2 (a) Compare CB, CE, and CC configurations of a BJT in terms of input/output impedance and current gain. [7 Marks]",
+          "Q3 (a) Explain the working principle of an N-channel Enhancement MOSFET with drain and transfer curves. [7 Marks]",
+          "Q4 (a) What is an Op-Amp? Derive the voltage gain of an inverting and non-inverting operational amplifier. [7 Marks]"
+        ]
+      },
+      {
+        id: "sample-5",
+        subject: "Database Management Systems (DBMS)",
+        code: "BCA-402",
+        university: "Lucknow University",
+        course: "BCA",
+        semester: "Sem 4",
+        year: "2025",
+        examType: "End Semester",
+        fileSize: "1.5 MB",
+        downloads: 389,
+        isSample: true,
+        maxMarks: 75,
+        duration: "3 Hours",
+        questions: [
+          "Q1. Explain the Three-Schema Architecture of DBMS and discuss logical vs physical data independence. [15 Marks]",
+          "Q2. Draw an ER Diagram for a University Examination System showing entities, attributes, and cardinalities. [15 Marks]",
+          "Q3. What is Normalization? Explain 1NF, 2NF, 3NF, and BCNF with suitable relational table examples. [15 Marks]",
+          "Q4. Explain ACID properties of a transaction and discuss Two-Phase Locking (2PL) protocol. [15 Marks]"
+        ]
+      },
+      {
+        id: "sample-6",
+        subject: "Operating Systems & Linux Internals",
+        code: "BCS-401",
+        university: "Delhi University",
+        course: "B.Sc",
+        semester: "Sem 4",
+        year: "2025",
+        examType: "End Semester",
+        fileSize: "1.7 MB",
+        downloads: 476,
+        isSample: true,
+        maxMarks: 75,
+        duration: "3 Hours",
+        questions: [
+          "Q1. Compare Preemptive and Non-Preemptive CPU scheduling. Calculate average waiting time using Round Robin (Quantum = 3ms). [15 Marks]",
+          "Q2. What is Deadlock? Explain Banker's Algorithm for deadlock avoidance with a safe-sequence example. [15 Marks]",
+          "Q3. Explain Paging and Segmentation memory management schemes. How does TLB improve effective memory access time? [15 Marks]",
+          "Q4. Discuss Page Replacement Algorithms: FIFO, Optimal, and LRU for a given reference string. [15 Marks]"
+        ]
+      },
+      {
+        id: "sample-7",
+        subject: "Financial Management & Corporate Finance",
+        code: "MBA-203",
+        university: "Mumbai University",
+        course: "MBA",
+        semester: "Sem 2",
+        year: "2025",
+        examType: "End Semester",
+        fileSize: "1.3 MB",
+        downloads: 294,
+        isSample: true,
+        maxMarks: 80,
+        duration: "3 Hours",
+        questions: [
+          "Q1. 'Wealth Maximization is superior to Profit Maximization as an objective of financial management.' Critically evaluate. [16 Marks]",
+          "Q2. Compare Net Present Value (NPV) and Internal Rate of Return (IRR) techniques of capital budgeting. [16 Marks]",
+          "Q3. Explain Modigliani-Miller (MM) hypothesis on capital structure and dividend policy with assumptions. [16 Marks]",
+          "Q4. Discuss the determinants of Working Capital requirements for a manufacturing enterprise. [16 Marks]"
+        ]
+      },
+      {
+        id: "sample-8",
+        subject: "Data Structures & Algorithms",
+        code: "BCS-301",
+        university: "BBDU Lucknow",
+        course: "B.Tech CSE",
+        semester: "Sem 3",
+        year: "2026",
+        examType: "Mid Semester / Sessional",
+        fileSize: "960 KB",
+        downloads: 540,
+        isSample: true,
+        maxMarks: 30,
+        duration: "1.5 Hours",
+        questions: [
+          "Q1. Convert the infix expression A + (B * C - (D / E ^ F) * G) * H into postfix notation using a stack. [6 Marks]",
+          "Q2. Write an algorithm to insert and delete a node at a specific position in a Doubly Linked List. [6 Marks]",
+          "Q3. Construct an AVL Tree by inserting keys: 40, 20, 10, 25, 30, 22, 50 showing all rotations clearly. [6 Marks]",
+          "Q4. Trace Quick Sort on the array [38, 27, 43, 3, 9, 82, 10] and state its best and worst-case time complexity. [6 Marks]"
+        ]
+      },
+      {
+        id: "sample-9",
+        subject: "Corporate Accounting & Auditing",
+        code: "BCM-304",
+        university: "Delhi University",
+        course: "B.Com",
+        semester: "Sem 3",
+        year: "2024",
+        examType: "End Semester",
+        fileSize: "1.6 MB",
+        downloads: 268,
+        isSample: true,
+        maxMarks: 75,
+        duration: "3 Hours",
+        questions: [
+          "Q1. Explain the provisions of the Companies Act regarding issue of shares at a discount and forfeiture of shares. [15 Marks]",
+          "Q2. Distinguish between Amalgamation in the nature of Merger and Amalgamation in the nature of Purchase (AS-14). [15 Marks]",
+          "Q3. What is Cash Flow Statement? Explain operating, investing, and financing activities as per AS-3. [15 Marks]"
+        ]
+      }
+    ];
+
+    // --- 2. APPLICATION STATE ---
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let appId = typeof __app_id !== 'undefined' ? __app_id : 'unipaper-hub-default';
+
+    let cloudPapers = [];
+    let sessionLocalFiles = {}; // Stores temporary ObjectURLs for files uploaded in current session
+    let bookmarkedIds = new Set();
+    let showBookmarksOnly = false;
+    let selectedUploadFile = null;
+
+    // Owner / Admin Auth State
+    let isAdminLoggedIn = false;
+    let currentAdminPin = "admin123";
+
+    // --- 3. FIREBASE INITIALIZATION & AUTH ---
+    async function initFirebase() {
+      try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+          console.warn("Firebase config unavailable, running with pre-loaded & session data.");
+          refreshUI();
+          return;
+        }
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          if (user) {
+            loadAdminConfigFromCloud();
+            subscribeToCloudPapers();
+          }
+        });
+      } catch (err) {
+        console.error("Firebase init error:", err);
+        refreshUI();
+      }
+    }
+
+    async function loadAdminConfigFromCloud() {
+      if (!db || !currentUser) return;
+      try {
+        const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings', 'admin_auth');
+        const snap = await getDoc(configRef);
+        if (snap.exists() && snap.data().pin) {
+          currentAdminPin = snap.data().pin;
+        }
+      } catch (err) {
+        console.warn("Using default admin PIN:", err);
+      }
+    }
+
+    function subscribeToCloudPapers() {
+      if (!db || !currentUser) return;
+      const loadingEl = document.getElementById('loadingState');
+      loadingEl.classList.remove('hidden');
+
+      const papersRef = collection(db, 'artifacts', appId, 'public', 'data', 'question_papers');
+      onSnapshot(
+        papersRef,
+        (snapshot) => {
+          loadingEl.classList.add('hidden');
+          cloudPapers = snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data(),
+            isCloud: true
+          }));
+          // Sort newest first in memory
+          cloudPapers.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          refreshUI();
+        },
+        (error) => {
+          loadingEl.classList.add('hidden');
+          console.error("Firestore read error:", error);
+          refreshUI();
+        }
+      );
+    }
+
+    // --- 4. DATA MERGING & DYNAMIC FILTER POPULATION ---
+    function getAllPapers() {
+      return [...cloudPapers, ...samplePapers];
+    }
+
+    function populateDynamicDropdowns(papers) {
+      const uniSelect = document.getElementById('filterUniversity');
+      const courseSelect = document.getElementById('filterCourse');
+      const yearSelect = document.getElementById('filterYear');
+
+      const currentUni = uniSelect.value;
+      const currentCourse = courseSelect.value;
+      const currentYear = yearSelect.value;
+
+      const universities = [...new Set(papers.map(p => p.university).filter(Boolean))].sort();
+      const courses = [...new Set(papers.map(p => p.course).filter(Boolean))].sort();
+      const years = [...new Set(papers.map(p => String(p.year)).filter(Boolean))].sort((a, b) => b - a);
+
+      uniSelect.innerHTML = `<option value="ALL">All Universities (${universities.length})</option>` +
+        universities.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
+
+      courseSelect.innerHTML = `<option value="ALL">All Courses (${courses.length})</option>` +
+        courses.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+
+      yearSelect.innerHTML = `<option value="ALL">All Years</option>` +
+        years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join('');
+
+      // Restore previous selections if still valid
+      if ([...uniSelect.options].some(o => o.value === currentUni)) uniSelect.value = currentUni;
+      if ([...courseSelect.options].some(o => o.value === currentCourse)) courseSelect.value = currentCourse;
+      if ([...yearSelect.options].some(o => o.value === currentYear)) yearSelect.value = currentYear;
+    }
+
+    function updateStats(papers) {
+      const uniqueUnis = new Set(papers.map(p => p.university?.trim().toLowerCase()).filter(Boolean));
+      const totalDownloads = papers.reduce((sum, p) => sum + (Number(p.downloads) || 0), 0);
+
+      document.getElementById('statTotalPapers').textContent = papers.length;
+      document.getElementById('statTotalUniversities').textContent = uniqueUnis.size;
+      document.getElementById('statTotalDownloads').textContent = totalDownloads.toLocaleString();
+      document.getElementById('savedCountBadge').textContent = bookmarkedIds.size;
+    }
+
+    // --- 5. FILTERING & RENDERING CARDS ---
+    window.refreshUI = function () {
+      const allPapers = getAllPapers();
+      populateDynamicDropdowns(allPapers);
+      updateStats(allPapers);
+      applyFilters();
+    };
+
+    window.applyFilters = function () {
+      const allPapers = getAllPapers();
+      const queryText = document.getElementById('searchInput').value.trim().toLowerCase();
+      const uniFilter = document.getElementById('filterUniversity').value;
+      const courseFilter = document.getElementById('filterCourse').value;
+      const semFilter = document.getElementById('filterSemester').value;
+      const yearFilter = document.getElementById('filterYear').value;
+
+      // Toggle clear search button
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (queryText.length > 0) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+
+      const filtered = allPapers.filter((paper) => {
+        if (showBookmarksOnly && !bookmarkedIds.has(paper.id)) return false;
+        if (uniFilter !== 'ALL' && paper.university !== uniFilter) return false;
+        if (courseFilter !== 'ALL' && paper.course !== courseFilter) return false;
+        if (semFilter !== 'ALL' && paper.semester !== semFilter) return false;
+        if (yearFilter !== 'ALL' && String(paper.year) !== yearFilter) return false;
+
+        if (queryText) {
+          const haystack = `${paper.subject} ${paper.code} ${paper.university} ${paper.course} ${paper.semester} ${paper.year}`.toLowerCase();
+          if (!haystack.includes(queryText)) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('resultsCounter').textContent = `Showing ${filtered.length} of ${allPapers.length} papers`;
+      renderPaperCards(filtered);
+    };
+
+    function renderPaperCards(papers) {
+      const grid = document.getElementById('papersGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      if (papers.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = papers.map((paper) => {
+        const isSaved = bookmarkedIds.has(paper.id);
+        const hasRealFile = Boolean(sessionLocalFiles[paper.id]);
+        const examBadgeColor = paper.examType?.toLowerCase().includes('mid')
+          ? 'bg-amber-50 text-amber-700 border-amber-200'
+          : 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+        // Admin-only Edit & Delete controls on each card
+        const adminCardActions = isAdminLoggedIn ? `
+          <div class="mt-3 pt-2.5 border-t border-dashed border-slate-200 flex items-center justify-between gap-2 bg-slate-50/80 -mx-5 -mb-5 px-5 py-2.5 rounded-b-2xl">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Admin Controls</span>
+            <div class="flex items-center gap-1.5">
+              <button
+                onclick="openEditPaperModal('${paper.id}')"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 text-xs font-semibold transition-colors"
+                title="Edit Paper Details"
+              >
+                <i data-lucide="pencil" class="w-3 h-3"></i>
+                <span>Edit</span>
+              </button>
+              <button
+                onclick="deletePaper('${paper.id}')"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-600 text-rose-700 hover:text-white text-xs font-semibold transition-colors"
+                title="Delete Paper"
+              >
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        ` : '';
+
+        return `
+          <article class="group bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 shadow-sm hover:shadow-lg hover:shadow-indigo-100/50 transition-all duration-200 flex flex-col justify-between p-5 animate-fade-in">
+            <div>
+              <!-- Top Row: University Badge + Bookmark -->
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                  <i data-lucide="landmark" class="w-3.5 h-3.5 shrink-0"></i>
+                  <span class="truncate max-w-[190px]">${escapeHtml(paper.university)}</span>
+                </span>
+
+                <button
+                  onclick="toggleBookmark('${paper.id}')"
+                  class="p-1.5 rounded-lg border transition-colors ${isSaved ? 'bg-amber-50 border-amber-200 text-amber-500' : 'border-transparent text-slate-400 hover:text-amber-500 hover:bg-slate-50'}"
+                  title="${isSaved ? 'Remove from Saved' : 'Save Paper'}"
+                >
+                  <i data-lucide="bookmark" class="w-4 h-4 ${isSaved ? 'fill-amber-400' : ''}"></i>
+                </button>
+              </div>
+
+              <!-- Subject Title & Code -->
+              <div class="mb-3">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-xs font-bold tracking-wide uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                    ${escapeHtml(paper.code)}
+                  </span>
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded-md border ${examBadgeColor}">
+                    ${escapeHtml(paper.examType || 'End Semester')}
+                  </span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug mt-1.5">
+                  ${escapeHtml(paper.subject)}
+                </h3>
+              </div>
+
+              <!-- Metadata Chips: Course, Semester, Year -->
+              <div class="flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-600 mb-4">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100/80">
+                  <i data-lucide="book-open" class="w-3.5 h-3.5 text-slate-400"></i>
+                  ${escapeHtml(paper.course)}
+                </span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100/80">
+                  <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-400"></i>
+                  ${escapeHtml(paper.semester)}
+                </span>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-semibold">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                  ${escapeHtml(String(paper.year))}
+                </span>
+              </div>
+            </div>
+
+            <!-- Footer: File Info + Action Buttons -->
+            <div class="pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span class="inline-flex items-center gap-1 font-medium">
+                  <i data-lucide="file-check" class="w-3.5 h-3.5 text-slate-400"></i>
+                  ${escapeHtml(paper.fileSize || '1.2 MB')}
+                </span>
+                <span class="inline-flex items-center gap-1 font-medium">
+                  <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-500"></i>
+                  <span id="dl-count-${paper.id}">${paper.downloads || 0}</span>
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  onclick="openPreviewModal('${paper.id}')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-indigo-300 bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 text-xs font-semibold transition-all"
+                >
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>View</span>
+                </button>
+                <button
+                  onclick="downloadPaper('${paper.id}')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition-all active:scale-95"
+                >
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>${hasRealFile ? 'File' : 'PDF'}</span>
+                </button>
+              </div>
+            </div>
+            ${adminCardActions}
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // --- 6. ADMIN AUTHENTICATION & CONTROLS ---
+    window.openAdminLoginModal = function () {
+      if (isAdminLoggedIn) {
+        showToast("You are already logged in as Owner/Admin.", "info");
+        return;
+      }
+      document.getElementById('adminLoginError').classList.add('hidden');
+      document.getElementById('adminPinInput').value = '';
+      const modal = document.getElementById('adminLoginModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+      setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+    };
+
+    window.closeAdminLoginModal = function () {
+      const modal = document.getElementById('adminLoginModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.handleAdminLogin = function (event) {
+      event.preventDefault();
+      const enteredPin = document.getElementById('adminPinInput').value.trim();
+      const errorEl = document.getElementById('adminLoginError');
+
+      if (enteredPin === currentAdminPin) {
+        isAdminLoggedIn = true;
+        errorEl.classList.add('hidden');
+        closeAdminLoginModal();
+        updateAdminUIState();
+        refreshUI();
+        showToast("Welcome Owner! Admin Upload & Management unlocked.", "success");
+      } else {
+        errorEl.classList.remove('hidden');
+      }
+    };
+
+    window.logoutAdmin = function () {
+      isAdminLoggedIn = false;
+      updateAdminUIState();
+      refreshUI();
+      showToast("Logged out of Admin mode. Portal is now in Student view.", "info");
+    };
+
+    function updateAdminUIState() {
+      const loginBtn = document.getElementById('headerAdminLoginBtn');
+      const headerUploadBtn = document.getElementById('headerAdminUploadBtn');
+      const adminBar = document.getElementById('adminControlBar');
+      const emptyUploadBtn = document.getElementById('emptyStateUploadBtn');
+
+      if (isAdminLoggedIn) {
+        loginBtn.classList.add('hidden');
+        headerUploadBtn.classList.remove('hidden');
+        headerUploadBtn.classList.add('inline-flex');
+        adminBar.classList.remove('hidden');
+        emptyUploadBtn.classList.remove('hidden');
+      } else {
+        loginBtn.classList.remove('hidden');
+        headerUploadBtn.classList.add('hidden');
+        headerUploadBtn.classList.remove('inline-flex');
+        adminBar.classList.add('hidden');
+        emptyUploadBtn.classList.add('hidden');
+      }
+    }
+
+    window.openChangePinModal = function () {
+      if (!isAdminLoggedIn) return;
+      document.getElementById('changePinError').classList.add('hidden');
+      document.getElementById('newAdminPinInput').value = '';
+      document.getElementById('confirmAdminPinInput').value = '';
+      const modal = document.getElementById('changePinModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window.closeChangePinModal = function () {
+      const modal = document.getElementById('changePinModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.handleChangePin = async function (event) {
+      event.preventDefault();
+      if (!isAdminLoggedIn) return;
+
+      const newPin = document.getElementById('newAdminPinInput').value.trim();
+      const confirmPin = document.getElementById('confirmAdminPinInput').value.trim();
+      const errEl = document.getElementById('changePinError');
+
+      if (newPin !== confirmPin) {
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      currentAdminPin = newPin;
+      if (db && currentUser) {
+        try {
+          const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'portal_settings', 'admin_auth');
+          await setDoc(configRef, { pin: newPin, updatedAt: Date.now() }, { merge: true });
+        } catch (err) {
+          console.warn("Could not sync PIN to cloud:", err);
+        }
+      }
+
+      closeChangePinModal();
+      showToast("Admin PIN updated successfully!", "success");
+    };
+
+    // --- 7. UPLOAD, EDIT & DELETE PAPER WORKFLOW (ADMIN ONLY) ---
+    window.openUploadModal = function () {
+      if (!isAdminLoggedIn) {
+        openAdminLoginModal();
+        return;
+      }
+      document.getElementById('editingPaperId').value = '';
+      document.getElementById('uploadModalTitle').textContent = 'Upload Question Paper';
+      document.getElementById('submitUploadBtn').innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Publish Paper</span>`;
+      document.getElementById('uploadForm').reset();
+      selectedUploadFile = null;
+      document.getElementById('fileNameDisplay').textContent = 'Click to select PDF or scanned image';
+
+      const modal = document.getElementById('uploadModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window.openEditPaperModal = function (paperId) {
+      if (!isAdminLoggedIn) return;
+      const paper = getAllPapers().find(p => p.id === paperId);
+      if (!paper) return;
+
+      document.getElementById('editingPaperId').value = paper.id;
+      document.getElementById('uploadModalTitle').textContent = 'Edit Question Paper';
+      document.getElementById('submitUploadBtn').innerHTML = `<i data-lucide="save" class="w-4 h-4"></i><span>Save Changes</span>`;
+
+      document.getElementById('upSubject').value = paper.subject || '';
+      document.getElementById('upCode').value = paper.code || '';
+      document.getElementById('upUniversity').value = paper.university || '';
+      document.getElementById('upCourse').value = paper.course || '';
+      document.getElementById('upSemester').value = paper.semester || 'Sem 1';
+      document.getElementById('upYear').value = String(paper.year || '2026');
+      document.getElementById('upExamType').value = paper.examType || 'End Semester';
+      document.getElementById('upNotes').value = (paper.questions || []).join('\n');
+
+      selectedUploadFile = null;
+      document.getElementById('fileNameDisplay').textContent = 'Optional: Select new PDF/image to replace existing file';
+
+      const modal = document.getElementById('uploadModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window.closeUploadModal = function () {
+      const modal = document.getElementById('uploadModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.handleFileSelect = function (event) {
+      const file = event.target.files[0];
+      const display = document.getElementById('fileNameDisplay');
+      if (file) {
+        selectedUploadFile = file;
+        const sizeKB = Math.round(file.size / 1024);
+        const readableSize = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB} KB`;
+        display.innerHTML = `<span class="text-indigo-600 font-semibold">${escapeHtml(file.name)}</span> (${readableSize})`;
+      } else {
+        selectedUploadFile = null;
+        display.textContent = 'Click to select PDF or scanned image';
+      }
+    };
+
+    window.handlePaperUpload = async function (event) {
+      event.preventDefault();
+      if (!isAdminLoggedIn) {
+        showToast("Unauthorized: Only Owner/Admin can upload or edit papers.", "info");
+        return;
+      }
+
+      const editingId = document.getElementById('editingPaperId').value.trim();
+      const btn = document.getElementById('submitUploadBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span><span>Saving...</span>`;
+
+      const subject = document.getElementById('upSubject').value.trim();
+      const code = document.getElementById('upCode').value.trim().toUpperCase();
+      const university = document.getElementById('upUniversity').value.trim();
+      const course = document.getElementById('upCourse').value.trim();
+      const semester = document.getElementById('upSemester').value;
+      const year = document.getElementById('upYear').value;
+      const examType = document.getElementById('upExamType').value;
+      const notes = document.getElementById('upNotes').value.trim();
+
+      let fileSize = null;
+      let fileType = null;
+      let localObjectUrl = null;
+      let originalFileName = null;
+
+      if (selectedUploadFile) {
+        const sizeKB = Math.max(1, Math.round(selectedUploadFile.size / 1024));
+        fileSize = sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${sizeKB} KB`;
+        fileType = selectedUploadFile.type || "application/pdf";
+        localObjectUrl = URL.createObjectURL(selectedUploadFile);
+        originalFileName = selectedUploadFile.name;
+      }
+
+      const customQuestions = notes
+        ? notes.split('\n').filter(line => line.trim().length > 0)
+        : [
+            `Q1. Explain the fundamental concepts and core architecture covered in ${subject} (${code}). [15 Marks]`,
+            `Q2. Discuss practical applications, advantages, and limitations of key methodologies in ${subject}. [15 Marks]`,
+            `Q3. Solve analytical problems and write structured notes on important theorems/modules of ${course} (${semester}). [15 Marks]`,
+            `Q4. Write short notes on any two major topics from the ${year} ${university} syllabus. [15 Marks]`
+          ];
+
+      try {
+        if (editingId) {
+          // UPDATE EXISTING PAPER
+          const existing = getAllPapers().find(p => p.id === editingId);
+          const updatedFields = {
+            subject,
+            code,
+            university,
+            course,
+            semester,
+            year,
+            examType,
+            maxMarks: examType.includes('Mid') ? 30 : 75,
+            duration: examType.includes('Mid') ? '1.5 Hours' : '3 Hours',
+            questions: customQuestions,
+            ...(fileSize ? { fileSize, fileType, originalFileName } : {})
+          };
+
+          if (localObjectUrl) {
+            sessionLocalFiles[editingId] = { url: localObjectUrl, type: fileType, name: originalFileName };
+          }
+
+          if (db && currentUser && existing?.isCloud) {
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'question_papers', editingId);
+            await updateDoc(docRef, updatedFields);
+          } else {
+            const idxSample = samplePapers.findIndex(p => p.id === editingId);
+            if (idxSample !== -1) samplePapers[idxSample] = { ...samplePapers[idxSample], ...updatedFields };
+            const idxCloud = cloudPapers.findIndex(p => p.id === editingId);
+            if (idxCloud !== -1) cloudPapers[idxCloud] = { ...cloudPapers[idxCloud], ...updatedFields };
+          }
+
+          closeUploadModal();
+          refreshUI();
+          showToast(`Updated "${subject}" successfully!`, 'success');
+        } else {
+          // CREATE NEW PAPER
+          const newPaperPayload = {
+            subject,
+            code,
+            university,
+            course,
+            semester,
+            year,
+            examType,
+            fileSize: fileSize || "1.1 MB",
+            fileType: fileType || "sample",
+            originalFileName: originalFileName || `${code}_${subject.replace(/\s+/g, '_')}.pdf`,
+            downloads: 1,
+            maxMarks: examType.includes('Mid') ? 30 : 75,
+            duration: examType.includes('Mid') ? '1.5 Hours' : '3 Hours',
+            questions: customQuestions,
+            createdAt: Date.now()
+          };
+
+          let createdId = `local-${Date.now()}`;
+          if (db && currentUser) {
+            const papersRef = collection(db, 'artifacts', appId, 'public', 'data', 'question_papers');
+            const docRef = await addDoc(papersRef, newPaperPayload);
+            createdId = docRef.id;
+          } else {
+            cloudPapers.unshift({ id: createdId, ...newPaperPayload });
+          }
+
+          if (localObjectUrl) {
+            sessionLocalFiles[createdId] = {
+              url: localObjectUrl,
+              type: fileType,
+              name: originalFileName
+            };
+          }
+
+          closeUploadModal();
+          refreshUI();
+          showToast(`"${subject}" published to portal!`, 'success');
+        }
+      } catch (err) {
+        console.error("Save failed:", err);
+        showToast("Could not sync to cloud, updated locally.", "info");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4"></i><span>Publish Paper</span>`;
+        lucide.createIcons();
+      }
+    };
+
+    window.deletePaper = async function (paperId) {
+      if (!isAdminLoggedIn) return;
+      const paper = getAllPapers().find(p => p.id === paperId);
+      if (!paper) return;
+
+      if (db && currentUser && paper.isCloud) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'question_papers', paperId);
+          await deleteDoc(docRef);
+        } catch (err) {
+          console.error("Delete failed:", err);
+        }
+      }
+
+      cloudPapers = cloudPapers.filter(p => p.id !== paperId);
+      samplePapers = samplePapers.filter(p => p.id !== paperId);
+      bookmarkedIds.delete(paperId);
+      delete sessionLocalFiles[paperId];
+
+      refreshUI();
+      showToast(`Deleted "${paper.code} - ${paper.subject}"`, 'info');
+    };
+
+    // --- 8. PREVIEW & DOWNLOAD LOGIC ---
+    window.openPreviewModal = function (paperId) {
+      const paper = getAllPapers().find(p => p.id === paperId);
+      if (!paper) return;
+
+      document.getElementById('prevCodeBadge').textContent = paper.code;
+      document.getElementById('prevUniBadge').textContent = `${paper.university} • ${paper.course} (${paper.semester})`;
+      document.getElementById('prevTitle').textContent = `${paper.subject} (${paper.year})`;
+
+      const dlBtn = document.getElementById('prevDownloadBtn');
+      dlBtn.onclick = () => downloadPaper(paper.id);
+
+      const previewBody = document.getElementById('previewBody');
+      const localFile = sessionLocalFiles[paper.id];
+
+      if (localFile) {
+        // Render genuine uploaded PDF or Image
+        if (localFile.type.includes('pdf')) {
+          previewBody.innerHTML = `
+            <div class="w-full h-full min-h-[65vh] bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+              <iframe src="${localFile.url}" class="w-full h-full min-h-[65vh]" title="PDF Preview"></iframe>
+            </div>
+          `;
+        } else if (localFile.type.startsWith('image/')) {
+          previewBody.innerHTML = `
+            <div class="flex flex-col items-center justify-center bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+              <img src="${localFile.url}" alt="${escapeHtml(paper.subject)}" class="max-w-full h-auto rounded-lg shadow" />
+            </div>
+          `;
+        }
+      } else {
+        // Render Realistic Formatted University Exam Paper Sheet
+        const questionsHtml = (paper.questions || []).map((q, idx) => `
+          <div class="py-3 border-b border-slate-100 last:border-none text-sm sm:text-base text-slate-800 leading-relaxed">
+            <p class="font-medium">${escapeHtml(q)}</p>
+          </div>
+        `).join('');
+
+        previewBody.innerHTML = `
+          <div id="printablePaperArea" class="max-w-3xl mx-auto bg-white rounded-xl shadow-md border border-slate-200 p-6 sm:p-10 text-slate-900">
+            <!-- Exam Sheet Header -->
+            <div class="text-center border-b-2 border-slate-800 pb-4 mb-5">
+              <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Printed Question Paper Archive • UniPaper Hub</p>
+              <h2 class="text-xl sm:text-2xl font-extrabold uppercase tracking-tight mt-1">${escapeHtml(paper.university)}</h2>
+              <p class="text-sm font-semibold text-slate-700 mt-1">${escapeHtml(paper.examType)} Examination — ${escapeHtml(String(paper.year))}</p>
+              <div class="mt-3 inline-block px-3 py-1 bg-slate-100 rounded-md text-xs font-bold uppercase tracking-wider">
+                Course: ${escapeHtml(paper.course)} | ${escapeHtml(paper.semester)}
+              </div>
+            </div>
+
+            <!-- Paper Metadata Table -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs mb-6">
+              <div>
+                <span class="text-slate-500 block">Subject Code</span>
+                <span class="font-bold text-slate-900 text-sm">${escapeHtml(paper.code)}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block">Subject Name</span>
+                <span class="font-bold text-slate-900">${escapeHtml(paper.subject)}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block">Time Allowed</span>
+                <span class="font-bold text-slate-900">${escapeHtml(paper.duration || '3 Hours')}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 block">Maximum Marks</span>
+                <span class="font-bold text-slate-900">${paper.maxMarks || 75}</span>
+              </div>
+            </div>
+
+            <!-- General Instructions -->
+            <div class="mb-6 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3.5 text-xs text-slate-700">
+              <p class="font-bold text-slate-900 mb-1">General Instructions to Candidates:</p>
+              <ul class="list-disc list-inside space-y-0.5">
+                <li>Attempt all sections as per internal choice instructions.</li>
+                <li>Assume suitable missing data wherever necessary and state it clearly.</li>
+                <li>Figures to the right indicate full marks.</li>
+              </ul>
+            </div>
+
+            <!-- Questions List -->
+            <div class="space-y-1">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-700 mb-2">Section — A & B (Long & Analytical Questions)</h4>
+              ${questionsHtml}
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-200 text-center text-xs text-slate-400">
+              *** End of Question Paper • Shared via UniPaper Hub ***
+            </div>
+          </div>
+        `;
+      }
+
+      const modal = document.getElementById('previewModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window.closePreviewModal = function () {
+      const modal = document.getElementById('previewModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    };
+
+    window.downloadPaper = async function (paperId) {
+      const paper = getAllPapers().find(p => p.id === paperId);
+      if (!paper) return;
+
+      // Increment download count in UI + Firestore
+      paper.downloads = (Number(paper.downloads) || 0) + 1;
+      const countEl = document.getElementById(`dl-count-${paper.id}`);
+      if (countEl) countEl.textContent = paper.downloads;
+      updateStats(getAllPapers());
+
+      if (db && currentUser && paper.isCloud) {
+        try {
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'question_papers', paper.id);
+          await updateDoc(docRef, { downloads: increment(1) });
+        } catch (e) {
+          console.warn("Could not sync download increment:", e);
+        }
+      }
+
+      // Trigger actual file download
+      const localFile = sessionLocalFiles[paper.id];
+      const link = document.createElement('a');
+
+      if (localFile) {
+        link.href = localFile.url;
+        link.download = localFile.name;
+      } else {
+        // Generate clean downloadable study sheet document for sample papers
+        const content = [
+          `====================================================================`,
+          `${paper.university.toUpperCase()}`,
+          `${paper.examType} Examination (${paper.year})`,
+          `====================================================================`,
+          `Subject : ${paper.subject} (${paper.code})`,
+          `Course  : ${paper.course} | ${paper.semester}`,
+          `Duration: ${paper.duration || '3 Hours'} | Max Marks: ${paper.maxMarks || 75}`,
+          `--------------------------------------------------------------------`,
+          `QUESTIONS:`,
+          ``,
+          ...(paper.questions || []).map((q, i) => `${q}\n`),
+          `--------------------------------------------------------------------`,
+          `Downloaded from UniPaper Hub — Open PYQ Repository for Students`
+        ].join('\n');
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        link.href = URL.createObjectURL(blob);
+        link.download = `${paper.code}_${paper.subject.replace(/[^a-zA-Z0-9]/g, '_')}_${paper.year}.txt`;
+      }
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showToast(`Downloading "${paper.code} - ${paper.subject}"`, 'success');
+    };
+
+    // --- 8. BOOKMARKS & FILTER HELPERS ---
+    window.toggleBookmark = function (paperId) {
+      if (bookmarkedIds.has(paperId)) {
+        bookmarkedIds.delete(paperId);
+        showToast('Removed from Saved Papers', 'info');
+      } else {
+        bookmarkedIds.add(paperId);
+        showToast('Paper bookmarked for quick revision!', 'success');
+      }
+      updateStats(getAllPapers());
+      applyFilters();
+    };
+
+    window.toggleBookmarksFilter = function () {
+      showBookmarksOnly = !showBookmarksOnly;
+      const btn = document.getElementById('bookmarkToggleBtn');
+      const banner = document.getElementById('savedFilterBanner');
+
+      if (showBookmarksOnly) {
+        btn.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-800');
+        banner.classList.remove('hidden');
+      } else {
+        btn.classList.remove('bg-amber-50', 'border-amber-300', 'text-amber-800');
+        banner.classList.add('hidden');
+      }
+      applyFilters();
+    };
+
+    window.clearSearch = function () {
+      document.getElementById('searchInput').value = '';
+      applyFilters();
+    };
+
+    window.resetAllFilters = function () {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterUniversity').value = 'ALL';
+      document.getElementById('filterCourse').value = 'ALL';
+      document.getElementById('filterSemester').value = 'ALL';
+      document.getElementById('filterYear').value = 'ALL';
+      if (showBookmarksOnly) {
+        toggleBookmarksFilter();
+      } else {
+        applyFilters();
+      }
+    };
+
+    // --- 9. TOAST NOTIFICATIONS & XSS PROTECTION ---
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = type === 'success'
+        ? 'bg-slate-900 text-white border-slate-700'
+        : 'bg-white text-slate-800 border-slate-200';
+      const iconName = type === 'success' ? 'check-circle-2' : 'info';
+      const iconColor = type === 'success' ? 'text-emerald-400' : 'text-indigo-600';
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium animate-fade-in ${colors}`;
+      toast.innerHTML = `
+        <i data-lucide="${iconName}" class="w-4 h-4 shrink-0 ${iconColor}"></i>
+        <span>${escapeHtml(message)}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Close modals on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeUploadModal();
+        closePreviewModal();
+        closeAdminLoginModal();
+        closeChangePinModal();
+      }
+    });
+
+    // Boot App
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateAdminUIState();
+      refreshUI();
+      initFirebase();
+    });
+  </script>
+</body>
+</html>
